@@ -1,5 +1,7 @@
 const Task = require('../models/Task')
 const asyncWrapper = require('../middleware/async')
+const { createCustomError } = require('../errors/custom-error.js')
+
 
 const getAllTasks = asyncWrapper (async(req, res) => {
     // res.send('get all tasks')
@@ -68,15 +70,17 @@ const getTask = asyncWrapper(async (req, res, next) => {
     const {id: taskId} = req.params
     const task = await Task.findOne({ _id: taskId})
     if(!task){
-        const error = new Error('Not found')
-        error.status = 404
+        // const error = new Error('Not found')
+        // error.status = 404
 
-        return res.status(404).json({
-            status: "failed",
-            msg: `no task with id: ${taskId}`
-        })
+        return next(createCustomError(`no task with id: ${taskId}`, 404))
 
-        return next(error)
+        // return res.status(404).json({
+        //     status: "failed",
+        //     msg: `no task with id: ${taskId}`
+        // })
+
+        // return next(error)
     }
 
     res.status(200).json({
@@ -120,11 +124,13 @@ const updateTask = asyncWrapper(async(req, res) => {
     })
 
     if(!task){
-        return res.status(404).json({
-            status: "failed",
-            msg: `no task with id: ${taskId}`
-        })
+        // return res.status(404).json({
+        //     status: "failed",
+        //     msg: `no task with id: ${taskId}`
+        // })
+        return next(createCustomError(`no task with id: ${taskId}`, 404))
     }
+
 
     res.status(200).json({
         status: "success",
@@ -152,10 +158,11 @@ const deleteTask = asyncWrapper(async(req, res) => {
     const {id: taskId} = req.params
     const task = await Task.findOneAndDelete({ _id: taskId})
     if(!task){
-        return res.status(404).json({
-            status: "failed",
-            msg: `no task with id: ${taskId}`
-        })
+        // return res.status(404).json({
+        //     status: "failed",
+        //     msg: `no task with id: ${taskId}`
+        // })
+        return next(createCustomError(`no task with id: ${taskId}`, 404))
     }
 
     res.status(200).json({
